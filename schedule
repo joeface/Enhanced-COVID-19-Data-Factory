@@ -1,0 +1,4 @@
+SHELL=/bin/bash
+BASH_ENV=/container.env
+
+*/5 * * * * /venv/bin/python /opt/main.py >> /var/log/cron.log 2>&1
