@@ -116,7 +116,7 @@ class CovidDataEnhancedFactory(object):
 
     def execute(self):
 
-        redis_status = 'FAIL'
+        redis_status = False
 
         try:
 
@@ -157,7 +157,7 @@ class CovidDataEnhancedFactory(object):
 
             logger.info(
                 'Covid data from online sources combined with manual entry google doc source')
-            logger.info('Saving JSON: ' + redis_status)
+            logger.info('Saving JSON: ' + 'OK' if redis_status else 'FAIL')
 
         except:
             logger.exception('! ERROR UPDATING COVID DATA')
