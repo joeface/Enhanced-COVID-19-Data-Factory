@@ -125,42 +125,52 @@ class CovidDataEnhancedFactory(object):
 
             try:
                 self.covid_data = self.read_arcgis()
-                logger.info('Covid data from online sources aquired')
+                logger.info('We have latest data from JHU ArcGIS')
+
             except Exception:
                 logger.exception(
-                    'Error acquiring data from online sources')
+                    '! Error fetching data from JHU ArcGIS')
                 raise
 
             try:
                 self.combine_data()
-                self.read_population_data()
+                logger.info(
+                    'Got COVID data from Worldometer and Manual Data Source')
 
+            except Exception:
+                logger.exception(
+                    '! Error acquiring data from Worldometer and Manual Data Source')
+                raise
+
+            try:
+
+                self.read_population_data()
                 logger.info(
                     'COVID data combined with Population')
 
             except Exception:
                 logger.exception(
-                    "Error combining online data with Google Sheet source and Population")
+                    "! Error combining COVID data with Population")
                 raise
 
             try:
                 if not self.validate_json():
-                    logger.exception("COVID JSON data validation fail")
+                    logger.exception("! COVID JSON data validation fail")
                     raise
 
                 redis_status = self.save_to_redis()
 
             except Exception:
                 logger.exception(
-                    'Error while saving data into Redis')
+                    '! Error while saving data into Redis')
                 raise
 
             logger.info(
-                'Covid data from online sources combined with manual entry google doc source')
+                'Data is valid and ready to writing into Redis')
             logger.info('Saving JSON: ' + 'OK' if redis_status else 'FAIL')
 
         except:
-            logger.exception('! ERROR UPDATING COVID DATA')
+            logger.exception('! AN ERROR UPDATING COVID DATA')
 
         return redis_status
 
@@ -169,10 +179,10 @@ class CovidDataEnhancedFactory(object):
         Normalize Country title
         Return a dictionary with COVID-19 country data with source, latest update label and county ISO code
         '''
-        if country_name in TITLES:
+        if country_name and country_name in TITLES:
             country_name = TITLES[country_name]
 
-        if country_name in CODES:
+        if country_name and country_name in CODES:
             country_code = CODES[country_name]
 
             confirmed = self.parse_num(confirmed)
@@ -192,7 +202,8 @@ class CovidDataEnhancedFactory(object):
                 'source': source
             }
 
-        logger.warning(f'{country_name} title from {source} not found'.encode('utf-8'))
+        if country_name:
+            logger.info(f'{country_name} title from {source} not found'.encode('utf-8'))
 
         return None
 
