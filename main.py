@@ -374,11 +374,11 @@ class CovidDataEnhancedFactory(object):
         day = datetime.now().day - 1
 
         r = requests.get('https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_daily_reports/{0}-{1}-2020.csv'.format(
-            datetime.now().strftime('%m'), str(day) if day > 9 else '0{}'.format(day)), timeout=40)
+            datetime.now().strftime('%m'), str(day) if day > 9 else '0{}'.format(day)), timeout=60)
 
         if r.status_code != requests.codes.ok:
-            logger.error(
-                'Died from Coronavirus trying to fetch latest data from github')
+            logger.warning('! Unable to fetch latest data from github')
+            return covid_data
 
         csv_reader = csv.reader(StringIO(r.text), delimiter=',')
         line = 0
