@@ -98,6 +98,8 @@ TITLES = {
     '': '',
 }
 
+REDIS_MASTER = os.environ.get(
+    'REDIS_MASTER') if os.environ.get('REDIS_MASTER') else 'mymaster'
 
 json_logging.ENABLE_JSON_LOGGING = True
 json_logging.init_non_web()
@@ -158,6 +160,7 @@ class CovidDataEnhancedFactory(object):
                     logger.exception("! COVID JSON data validation fail")
                     raise
 
+                logger.info('Data is valid and ready to writing into Redis')
                 redis_status = self.save_to_redis()
 
             except Exception:
@@ -165,8 +168,6 @@ class CovidDataEnhancedFactory(object):
                     '! Error while saving data into Redis')
                 raise
 
-            logger.info(
-                'Data is valid and ready to writing into Redis')
             logger.info('Saving JSON: ' + 'OK' if redis_status else 'FAIL')
 
         except:
@@ -198,7 +199,6 @@ class CovidDataEnhancedFactory(object):
                 'recovered': recovered,
                 'active': active if active > 0 else 0,
                 'latest_update': latest_update,
-                ''
                 'source': source
             }
 
@@ -439,12 +439,14 @@ class CovidDataEnhancedFactory(object):
                 if line > 0:
 
                     obj = self.add_country_data(country_name=row[0], confirmed=row[1], deaths=row[
-                        2], recovered=row[3], latest_update=row[5], source=row[4])
+                        2], recovered=row[3], latest_update=row[5], source={'ru': row[4], 'en': row[6]})
 
                     if obj:
                         data[obj['code']] = obj
 
                 line += 1
+
+            logger.info('Fetched data from Manual Data Source')
 
         except Exception:
             logger.exception(
@@ -586,6 +588,14 @@ class CovidDataEnhancedFactory(object):
 
                 if c in COUNTRIES:
 
+                    source = ''
+
+                    if type(data['source']) is str:
+                        source = data['source']
+                    elif type(data['source']) is dict:
+                        if language in data['source']:
+                            source = data['source'][language]
+
                     props = {'name': COUNTRIES[country_data['code']][language],
                              'latest_update': data['latest_update'],
                              'confirmed': data['confirmed'],
@@ -593,7 +603,7 @@ class CovidDataEnhancedFactory(object):
                              'recovered': data['recovered'],
                              'active': data['active'],
                              'population': data['population'] if 'population' in data else 0,
-                             'source': data['source'],
+                             'source': source,
                              'cd': data['cd'] if 'cd' in data else 0,
                              'dd': data['dd'] if 'dd' in data else 0,
                              'rd': data['rd'] if 'rd' in data else 0,
@@ -651,22 +661,35 @@ class CovidDataEnhancedFactory(object):
         as covid_data_ru and covid_data_en objects
         '''
 
+        status = False
+
+        logger.info('Trying to connect to Redis Sentinel')
+
         sentinel_client = Sentinel(
             [('redis-sentinel', 26379)], socket_timeout=0.1)
-        logger.info('Getting Sentinel Client')
 
-        sentinel_client.discover_master('mymaster')
+        try:
 
-        logger.info('Discovering Redis Master')
-        master = sentinel_client.master_for('mymaster', socket_timeout=0.1)
+            sentinel_client.discover_master(REDIS_MASTER)
 
-        logger.info('Discovering Redis Slave')
-        slave = sentinel_client.slave_for('mymaster', socket_timeout=0.1)
+            logger.info('Discovering Redis Master')
+            master = sentinel_client.master_for(
+                REDIS_MASTER, socket_timeout=0.1)
+
+            logger.info('Discovering Redis Slave')
+            slave = sentinel_client.slave_for(REDIS_MASTER, socket_timeout=0.1)
+
+        except:
+            logger.error('! Can not connect to Redis')
+            return status
 
         for language in ('ru', 'en'):
-            logger.info(f'Saving {language} covid_data into Slave')
-            status = slave.set('covid_data_' + language, json.dumps(
-                self.create_geojson(language), ensure_ascii=False))
+
+            logger.info(f'Saving {language.upper()} covid_data into Slave')
+
+            data = self.create_geojson(language)
+            status = slave.set('covid_data_' + language,
+                               json.dumps(data, ensure_ascii=False))
 
         return status
 

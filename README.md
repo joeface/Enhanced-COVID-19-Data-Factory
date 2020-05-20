@@ -25,6 +25,12 @@ If you would like to activate Manual Data Input feature, please set environment 
 export MANUAL_DATA_SOURCE_URL='https://docs.google.com/spreadsheets/d/e/SPREADSHEET_ID/pub?gid=0&single=true&output=csv'
 ```
 
+You may also set your Redis Master name as an environment variable (default value is 'mymaster'):
+
+```bash
+export REDIS_MASTER='my-redis-master'
+```
+
 Copy **main.py** file content into Google Cloud Function editor or Amazon Lambda and execute function.
 
 ```python
