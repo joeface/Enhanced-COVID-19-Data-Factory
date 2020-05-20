@@ -5,6 +5,8 @@ The app supports manual data input from a Google Sheet as well.
 
 The output of the script is ready-to-go [GeoJSON list](https://medium.com/@joeface/building-a-covid-19-map-using-django-leafletjs-google-spreadsheets-and-s3-cloud-storage-75bb522771f9) with geometry for all countries.
 
+**By default the result is stored in Redis Cluster. In case Redis is not available, data is stored as a file in WORKDIR**
+
 Live map is available [here](https://www.currenttime.tv/a/covid-19-interactive-map/30484955.html).
 
 
@@ -19,7 +21,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-If you would like to activate Manual Data Input feature, please set environment variable MANUAL_DATA_SOURCE_URL with a link to Google Spreadsheet:
+If you would like to activate Manual Data Input feature, please set environment variable MANUAL_DATA_SOURCE_URL with a link to Google Sheet. More details on the feature you may find in a [blog post](https://medium.com/analytics-vidhya/how-to-keep-your-app-serverless-with-google-sheets-as-a-data-storage-e80dff70e9fc). Sample Sheet is available [here](https://docs.google.com/spreadsheets/d/10Xlr25Qtb-sRDJPqX66zqPPEP8yignUsPxxhT0O9Zb0/edit?usp=sharing).
 
 ```bash
 export MANUAL_DATA_SOURCE_URL='https://docs.google.com/spreadsheets/d/e/SPREADSHEET_ID/pub?gid=0&single=true&output=csv'
