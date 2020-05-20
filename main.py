@@ -662,36 +662,50 @@ class CovidDataEnhancedFactory(object):
         '''
 
         status = False
+        data = {}
 
-        logger.info('Trying to connect to Redis Sentinel')
-
-        sentinel_client = Sentinel(
-            [('redis-sentinel', 26379)], socket_timeout=0.1)
+        for language in ('ru', 'en'):
+            data[language] = self.create_geojson(language)
 
         try:
 
-            sentinel_client.discover_master(REDIS_MASTER)
+            logger.info('Connecting to Redis Sentinel')
+
+            sentinel_client = Sentinel(
+                [('redis-sentinel', 26379)], socket_timeout=0.1)
 
             logger.info('Discovering Redis Master')
+            sentinel_client.discover_master(REDIS_MASTER)
             master = sentinel_client.master_for(
                 REDIS_MASTER, socket_timeout=0.1)
 
             logger.info('Discovering Redis Slave')
             slave = sentinel_client.slave_for(REDIS_MASTER, socket_timeout=0.1)
 
-        except:
-            logger.error('! Can not connect to Redis')
+            for language in ('ru', 'en'):
+
+                logger.info(f'Saving {language.upper()} covid_data into Slave')
+                status = slave.set('covid_data_' + language,
+                                   json.dumps(data[language], ensure_ascii=False))
+
+                if not status:
+                    return False
+
             return status
 
-        for language in ('ru', 'en'):
+        except:
+            logger.warning(
+                'Can not proceed with Redis. Saving JSON as a file.')
 
-            logger.info(f'Saving {language.upper()} covid_data into Slave')
+            try:
+                for language in ('ru', 'en'):
+                    with open(language + '.json', 'w') as outfile:
+                        logger.info(f'Saving {language.upper()} as {language}.json')
+                        json.dump(data[language], outfile, ensure_ascii=False)
+            except:
+                logger.warning('Can not save data as a file.')
 
-            data = self.create_geojson(language)
-            status = slave.set('covid_data_' + language,
-                               json.dumps(data, ensure_ascii=False))
-
-        return status
+            return False
 
     def parse_num(self, text=None):
         '''
