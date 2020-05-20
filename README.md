@@ -1,9 +1,10 @@
 # Enhanced COVID-19 Data Factory with Redis Cluster Support
 
-Enhanced COVID-19 Data Factory is a fork of [COVID-19 Data Factory](https://github.com/joeface/COVID-19-Data-Fabric). This is a Python script that fetches actual COVID-19 data from CSSE at JHU, Worldometers and projects it onto Population data (UN). The result is stored in Redis Cluster. 
-The app supports manual data input from a Google Sheet as well.
+Enhanced COVID-19 Data Factory is a fork of [COVID-19 Data Factory](https://github.com/joeface/COVID-19-Data-Fabric). This is a Python script that fetches actual COVID-19 data from CSSE at JHU, Worldometers and projects it onto Population data (UN). The app supports manual data input from a Google Sheet as well.
 
 The output of the script is ready-to-go [GeoJSON list](https://medium.com/@joeface/building-a-covid-19-map-using-django-leafletjs-google-spreadsheets-and-s3-cloud-storage-75bb522771f9) with geometry for all countries.
+
+A lightweight list or GeoJSON features for each country used to render the map may be found in [world-map-geo.json](world-map-geo.json) file.
 
 **By default the result is stored in Redis Cluster. In case Redis is not available, data is stored as a file in WORKDIR**
 
