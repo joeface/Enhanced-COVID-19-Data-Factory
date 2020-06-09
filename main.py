@@ -478,6 +478,8 @@ class CovidDataEnhancedFactory(object):
 
         for item in json_data['features']:
 
+            print(item['attributes']['Country_Region'])
+
             obj = self.add_country_data(
                 country_name=item['attributes']['Country_Region'], confirmed=item['attributes']['Confirmed'], deaths=item['attributes']['Deaths'], recovered=item['attributes']['Recovered'], latest_update=datetime.fromtimestamp(item['attributes']['Last_Update'] / 1000).strftime("%Y/%m/%d, %H:%M:%S"), source='JHU CSSE')
 
@@ -714,6 +716,9 @@ class CovidDataEnhancedFactory(object):
         '''
         if type(text) is int:
             return text
+
+        if not text:
+            return 0
 
         text = text.strip().replace(',', '')
         if len(text):
