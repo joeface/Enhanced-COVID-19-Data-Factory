@@ -28,6 +28,12 @@ If you would like to activate Manual Data Input feature, please set environment 
 export MANUAL_DATA_SOURCE_URL='https://docs.google.com/spreadsheets/d/e/SPREADSHEET_ID/pub?gid=0&single=true&output=csv'
 ```
 
+It is also possible to force the app to use Worldometer data for a country. Just set up an environment variable FORCE_WORLDOMETER with a comma-separated list of ISO-codes. Like this: 
+
+```bash
+export FORCE_WORLDOMETER=KGZ,KAZ,RUS,UKR,MZX,UZB
+```
+
 You may also set your Redis Master name as an environment variable (default value is 'mymaster'):
 
 ```bash

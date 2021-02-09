@@ -19,7 +19,7 @@ ENV VIRTUAL_ENV "/venv"
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH "$VIRTUAL_ENV/bin:$PATH"
 ENV MANUAL_DATA_SOURCE_URL "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRXudbSwPQY2DJDcYQ3Rot7TxLR1I8HzepeRuhU6VRAcVCnKKDS7wNvku0VlX0yg_fv7eiXpd41YWK/pub?gid=0&single=true&output=csv"
-
+ENV FORCE_WORLDOMETER=KGZ,KAZ,MZX,RUS,SRB,UKR,USA,UZB
 
 # Install Python packages and run app
 RUN python -m pip install -r /opt/requirements.txt --no-cache-dir

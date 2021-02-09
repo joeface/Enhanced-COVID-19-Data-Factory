@@ -32,6 +32,12 @@ Country Title,Confirmed Cases,Deaths,Recovered,Source,Latest Update (YYYY-MM-DD 
 MANUAL_DATA_SOURCE_URL = os.environ.get(
     'MANUAL_DATA_SOURCE_URL') if os.environ.get('MANUAL_DATA_SOURCE_URL') else None
 
+'''
+Set a list of countries to force fetching data from Wolrdometer website. Should be provided as a comma-separated list of ISO-codes).
+'''
+FORCE_WORLDOMETER = os.environ.get(
+    'FORCE_WORLDOMETER').split(',') if os.environ.get('FORCE_WORLDOMETER') else ()
+
 
 COUNTRIES = {}
 CODES = {}
@@ -137,7 +143,7 @@ class CovidDataEnhancedFactory(object):
             try:
                 self.combine_data()
                 logger.info(
-                    'Got COVID data from Worldometer and Manual Data Source')
+                    'Finished fetching data from Worldometer and Manual Data Source')
 
             except Exception:
                 logger.exception(
@@ -384,8 +390,8 @@ class CovidDataEnhancedFactory(object):
         covid_data = {}
         day = datetime.now().day - 1
 
-        r = requests.get('https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_daily_reports/{0}-{1}-2020.csv'.format(
-            datetime.now().strftime('%m'), str(day) if day > 9 else '0{}'.format(day)), timeout=60)
+        r = requests.get('https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_daily_reports/{0}-{1}-{2}.csv'.format(
+            datetime.now().strftime('%m'), str(day) if day > 9 else '0{}'.format(day), datetime.now().strftime('%Y')), timeout=60)
 
         if r.status_code != requests.codes.ok:
             logger.warning('! Unable to fetch latest data from github')
@@ -558,10 +564,12 @@ class CovidDataEnhancedFactory(object):
                     'T', ' ')
                 self.covid_data[code]['source'] = 'JHU CSSE'
 
-        if(len(wom_data)):
+        if(len(wom_data) and len(FORCE_WORLDOMETER)):
+
+            logger.info('Force fetching data from Worldometer for: ' + ', '.join(FORCE_WORLDOMETER))
 
             for code in wom_data:
-                if code not in self.covid_data or code in ('SRB', 'KGZ', 'KAZ', 'RUS', 'UKR', 'MZX', 'UZB',):
+                if code not in self.covid_data or code in FORCE_WORLDOMETER:
                     if code in COUNTRIES:
                         self.covid_data[code] = wom_data[code]
 
@@ -648,7 +656,7 @@ class CovidDataEnhancedFactory(object):
                 if (not (data['confirmed'] > 0 or data['deaths'] > 0 or data['recovered'] > 0) or not (data['confirmed'] >= data['deaths'] + data['recovered'])) and code not in ('TKM', 'PRK',):
                     logger.error(data)
                     raise ValueError
-
+            
             # Return True if data is valid
             return True
 
