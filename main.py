@@ -209,7 +209,8 @@ class CovidDataEnhancedFactory(object):
             }
 
         if country_name:
-            logger.info(f'{country_name} title from {source} not found'.encode('utf-8'))
+            logger.info(
+                f'{country_name} title from {source} not found'.encode('utf-8'))
 
         return None
 
@@ -405,9 +406,9 @@ class CovidDataEnhancedFactory(object):
             if line > 0:
                 country_name = row[3]
                 latest_update = row[4]
-                confirmed = int(row[7])
-                deaths = int(row[8])
-                recovered = int(row[9])
+                confirmed = self.parse_num(row[7])
+                deaths = self.parse_num(row[8])
+                recovered = self.parse_num(row[9])
 
                 obj = self.add_country_data(
                     country_name=country_name, confirmed=confirmed, deaths=deaths, recovered=recovered, latest_update=latest_update, source='JHU CSSE')
@@ -566,7 +567,8 @@ class CovidDataEnhancedFactory(object):
 
         if(len(wom_data) and len(FORCE_WORLDOMETER)):
 
-            logger.info('Force fetching data from Worldometer for: ' + ', '.join(FORCE_WORLDOMETER))
+            logger.info('Force fetching data from Worldometer for: ' +
+                        ', '.join(FORCE_WORLDOMETER))
 
             for code in wom_data:
                 if code not in self.covid_data or code in FORCE_WORLDOMETER:
@@ -656,7 +658,7 @@ class CovidDataEnhancedFactory(object):
                 if (not (data['confirmed'] > 0 or data['deaths'] > 0 or data['recovered'] > 0) or not (data['confirmed'] >= data['deaths'] + data['recovered'])) and code not in ('TKM', 'PRK',):
                     logger.error(data)
                     raise ValueError
-            
+
             # Return True if data is valid
             return True
 
@@ -708,7 +710,8 @@ class CovidDataEnhancedFactory(object):
             try:
                 for language in ('ru', 'en'):
                     with open(language + '.json', 'w') as outfile:
-                        logger.info(f'Saving {language.upper()} as {language}.json')
+                        logger.info(
+                            f'Saving {language.upper()} as {language}.json')
                         json.dump(data[language], outfile, ensure_ascii=False)
             except:
                 logger.warning('Can not save data as a file.')
