@@ -174,7 +174,8 @@ class CovidDataEnhancedFactory(object):
                     '! Error while saving data into Redis')
                 raise
 
-            logger.info('Saving JSON: ' + 'OK' if redis_status else 'FAIL')
+            logger.info('Saving JSON to Redis: ' +
+                        'OK' if redis_status else 'FAIL')
 
         except:
             logger.exception('! AN ERROR UPDATING COVID DATA')
