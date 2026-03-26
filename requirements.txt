@@ -4,6 +4,6 @@ chardet==3.0.4
 idna==3.7
 json-logging==1.2.0
 redis==4.4.4
-requests==2.32.4
+requests==2.33.0
 soupsieve==2.0
 urllib3>=1.26.5
